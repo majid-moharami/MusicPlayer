@@ -33,8 +33,8 @@
             android:background="#171717"
             android:scrollbarSize="8dp"
             app:tabIndicator="@drawable/tab_indcator"
-            app:tabIndicatorColor="#AEEA00"
-            app:tabIndicatorHeight="4dp"
+            app:tabIndicatorColor="#B7B8B5"
+            app:tabIndicatorHeight="3dp"
             app:tabMaxWidth="0dp"
             app:tabTextColor="#FFFFFF"
             />
