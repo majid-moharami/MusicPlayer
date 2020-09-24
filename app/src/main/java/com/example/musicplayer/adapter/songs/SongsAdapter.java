@@ -104,8 +104,6 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.SongHolder> 
                 bitmapFactory.outWidth = mSongCoverImage.getMaxWidth();
                 bitmapFactory.outHeight = mSongCoverImage.getMaxHeight();
                 Bitmap songImage = BitmapFactory.decodeByteArray(mPic, 0, mPic.length, bitmapFactory);
-//            ByteArrayOutputStream out = new ByteArrayOutputStream();
-//            songImage.compress(Bitmap.CompressFormat.PNG,50,out);
                 mSongCoverImage.setImageBitmap(songImage);
             }else mSongCoverImage.setBackgroundResource(R.drawable.default_image_round);
 

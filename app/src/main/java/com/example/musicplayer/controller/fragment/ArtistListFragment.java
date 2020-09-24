@@ -62,7 +62,7 @@ public class ArtistListFragment extends Fragment {
             return;
         }
         if (mAdapter == null) {
-            mAdapter = new ArtistAdapter(mArtistList);
+            mAdapter = new ArtistAdapter(mArtistList,getActivity());
             mRecyclerView.setAdapter(mAdapter);
         } else {
             mAdapter.setArtists(mArtistList);

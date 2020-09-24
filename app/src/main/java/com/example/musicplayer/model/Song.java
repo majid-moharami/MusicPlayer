@@ -6,7 +6,7 @@ import android.net.Uri;
 import java.io.Serializable;
 import java.util.UUID;
 
-public class Song {
+public class Song implements Serializable{
 
     private String mSongName;
     private String mArtistName;

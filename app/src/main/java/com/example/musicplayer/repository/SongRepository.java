@@ -49,6 +49,15 @@ public class SongRepository {
         return null;
     }
 
+    public Song getSongFromPath(String path){
+        for (int i = 0; i <mSongList.size() ; i++) {
+            if (mSongList.get(i).getPath().equals(path)){
+                return mSongList.get(i);
+            }
+        }
+        return null;
+    }
+
     public void playMusic() throws IOException {
         if (mMediaPlayer!=null){
             if (mMediaPlayer.isPlaying())
@@ -63,6 +72,10 @@ public class SongRepository {
 
     }
 
+    public MediaPlayer getMediaPlayer() {
+        return mMediaPlayer;
+    }
+
     public List<Album> getAllAlbum(){
         List<Album> albumList = new ArrayList<>();
 
@@ -75,10 +88,10 @@ public class SongRepository {
                 }
             }
             if (!IsExist){
-                List<Song> tempAlbum = new ArrayList<>();
+                List<String> tempAlbum = new ArrayList<>();
                 for (int j = 0; j < mSongList.size() ; j++) {
                     if (mSongList.get(j).getAlbumName().equals(mSongList.get(i).getAlbumName())){
-                        tempAlbum.add(mSongList.get(j));
+                        tempAlbum.add(mSongList.get(j).getPath());
                     }
                 }
                 albumList.add(new Album(tempAlbum,mSongList.get(i).getAlbumName()));
@@ -86,6 +99,26 @@ public class SongRepository {
 
         }
         return albumList;
+    }
+
+    public void playNextMusic() throws IOException {
+        for (int i = 0; i <mSongList.size() ; i++) {
+            if (mSongList.get(i).getUUID().equals(mCurrentSong.getUUID())){
+                setCurrentSong(mSongList.get(i+1));
+                playMusic();
+                return;
+            }
+        }
+    }
+
+    public void playPreviousMusic() throws IOException {
+        for (int i = 0; i <mSongList.size() ; i++) {
+            if (mSongList.get(i).getUUID().equals(mCurrentSong.getUUID())){
+                setCurrentSong(mSongList.get(i-1));
+                playMusic();
+                return;
+            }
+        }
     }
 
     public List<Artist> getAllArtist(){
@@ -99,10 +132,10 @@ public class SongRepository {
                 }
             }
            if (!IsExitArtist){
-               List<Song> tempSong= new ArrayList<>();
+               List<String> tempSong= new ArrayList<>();
                for (int j = 0; j < mSongList.size() ; j++) {
                    if (mSongList.get(j).getArtistName().equals(mSongList.get(i).getArtistName())){
-                       tempSong.add(mSongList.get(j));
+                       tempSong.add(mSongList.get(j).getPath());
                    }
                }
                artistList.add(new Artist(tempSong,mSongList.get(i).getArtistName()));

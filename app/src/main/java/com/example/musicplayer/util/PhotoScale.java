@@ -4,8 +4,17 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
+import android.media.MediaMetadataRetriever;
+
+import com.example.musicplayer.model.Song;
 
 public class PhotoScale {
+
+    public static void bitMapFactorySongCover(Song song){
+        MediaMetadataRetriever mMediaMetadataRetriever = new MediaMetadataRetriever();
+        mMediaMetadataRetriever.setDataSource(song.getPath());
+        byte[] mPic = mMediaMetadataRetriever.getEmbeddedPicture();
+    }
 
     public static Bitmap getScaledBitmap(String path, int destWidth, int destHeight) {
         // Get the dimensions of the bitmap

@@ -1,21 +1,25 @@
 package com.example.musicplayer.model;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Artist {
-    private List<Song> mSongsOfArtist;
+public class Artist implements Serializable {
+    private List<String> mSongsOfArtist;
     private String mArtistName;
 
-    public Artist(List<Song> songsOfArtist, String artistName) {
+    public Artist(List<String> songsOfArtist, String artistName) {
         mSongsOfArtist = songsOfArtist;
         mArtistName = artistName;
     }
 
-    public List<Song> getSongsOfArtist() {
+    public Artist() {
+    }
+
+    public List<String> getSongsOfArtist() {
         return mSongsOfArtist;
     }
 
-    public void setSongsOfArtist(List<Song> songsOfArtist) {
+    public void setSongsOfArtist(List<String> songsOfArtist) {
         mSongsOfArtist = songsOfArtist;
     }
 

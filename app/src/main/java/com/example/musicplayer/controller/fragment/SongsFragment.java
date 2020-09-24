@@ -15,6 +15,8 @@ import android.view.ViewGroup;
 
 import com.example.musicplayer.R;
 import com.example.musicplayer.adapter.songs.SongsAdapter;
+import com.example.musicplayer.model.Album;
+import com.example.musicplayer.model.Artist;
 import com.example.musicplayer.model.Song;
 import com.example.musicplayer.repository.SongRepository;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
@@ -31,6 +33,8 @@ import java.util.UUID;
  */
 public class SongsFragment extends Fragment implements SongsAdapter.PlayMusicCallback {
 
+    public static final String ARGS_KEY_ABLBUM = "ARGS_KEY_ABLBUM";
+    public static final String ARGS_KEY_ARTIST = "ARGS_KEY_ARTIST";
     private FastScrollRecyclerView mRecyclerView;
     private SongsAdapter mAdapter;
     private SongRepository mSongRepository;
@@ -39,9 +43,11 @@ public class SongsFragment extends Fragment implements SongsAdapter.PlayMusicCal
     private InitNavigationPlayMusicCallback mCallback;
 
 
-    public static SongsFragment newInstance() {
+    public static SongsFragment newInstance(Album album, Artist artist) {
         SongsFragment fragment = new SongsFragment();
         Bundle args = new Bundle();
+        args.putSerializable(ARGS_KEY_ABLBUM, album);
+        args.putSerializable(ARGS_KEY_ARTIST, artist);
         fragment.setArguments(args);
         return fragment;
     }
@@ -58,7 +64,36 @@ public class SongsFragment extends Fragment implements SongsAdapter.PlayMusicCal
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_songs, container, false);
         findViews(view);
-        mAllMusic = mSongRepository.getSongList();
+        Album album = (Album) getArguments().getSerializable(ARGS_KEY_ABLBUM);
+        Artist artist = (Artist) getArguments().getSerializable(ARGS_KEY_ARTIST);
+        if (album ==null&& artist==null){
+            mAllMusic = mSongRepository.getSongList();
+        }else {
+            if (album != null) {
+                if (album.getSongsOfAlbum().size()!=0){
+                    for (int i = 0; i <mSongRepository.getSongList().size() ; i++) {
+                        for (int j = 0; j < album.getSongsOfAlbum().size() ; j++) {
+                            if (mSongRepository.getSongList().get(i).getPath().equals(album.getSongsOfAlbum().get(j))){
+                                mAllMusic.add(mSongRepository.getSongList().get(i));
+                            }
+                        }
+                    }
+                }
+                    //mAllMusic = album.getSongsOfAlbum();
+            } else if (artist != null ) {
+                if ( artist.getSongsOfArtist().size()!=0){
+                    for (int i = 0; i <mSongRepository.getSongList().size() ; i++) {
+                        for (int j = 0; j < artist.getSongsOfArtist().size() ; j++) {
+                            if (mSongRepository.getSongList().get(i).getPath().equals(artist.getSongsOfArtist().get(j))){
+                                mAllMusic.add(mSongRepository.getSongList().get(i));
+                            }
+                        }
+                    }
+                }
+                    //mAllMusic = artist.getSongsOfArtist();
+            }
+        }
+
         mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 1));
         updateUI();
         return view;
@@ -82,7 +117,7 @@ public class SongsFragment extends Fragment implements SongsAdapter.PlayMusicCal
             return;
         }
         if (mAdapter == null) {
-            mAdapter = new SongsAdapter(mAllMusic, this,getActivity());
+            mAdapter = new SongsAdapter(mAllMusic, this, getActivity());
             mRecyclerView.setAdapter(mAdapter);
         } else {
             mAdapter.setSongList(mAllMusic);
@@ -95,7 +130,10 @@ public class SongsFragment extends Fragment implements SongsAdapter.PlayMusicCal
         Song song = mSongRepository.getSong(uuid);
         mSongRepository.setCurrentSong(song);
         mSongRepository.playMusic();
-        mCallback.onClick(song.getUUID());
+        Album album = (Album) getArguments().getSerializable(ARGS_KEY_ABLBUM);
+        Artist artist = (Artist) getArguments().getSerializable(ARGS_KEY_ARTIST);
+        if (album ==null&& artist==null)
+            mCallback.onClick(song.getUUID());
     }
 
     public interface InitNavigationPlayMusicCallback {

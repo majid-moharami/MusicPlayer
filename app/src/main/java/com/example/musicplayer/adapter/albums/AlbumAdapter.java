@@ -1,5 +1,7 @@
 package com.example.musicplayer.adapter.albums;
 
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
@@ -14,7 +16,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.musicplayer.R;
 import com.example.musicplayer.adapter.songs.SongsAdapter;
+import com.example.musicplayer.controller.activity.MusicListActivity;
 import com.example.musicplayer.model.Album;
+import com.example.musicplayer.model.Artist;
+import com.example.musicplayer.model.Song;
+import com.example.musicplayer.repository.SongRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,9 +28,13 @@ import java.util.List;
 public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumHolder> {
 
     private List<Album> mAlbumList = new ArrayList<>();
+    private Context mContext;
+    private SongRepository mSongRepository ;
 
-    public AlbumAdapter(List<Album> albumList) {
+    public AlbumAdapter(List<Album> albumList,Context context) {
         mAlbumList = albumList;
+        mContext = context;
+        mSongRepository = SongRepository.getSongRepository(mContext);
     }
 
     public List<Album> getAlbumList() {
@@ -33,6 +43,7 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumHolder>
 
     public void setAlbumList(List<Album> albumList) {
         mAlbumList = albumList;
+
     }
 
     @NonNull
@@ -54,7 +65,7 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumHolder>
         return mAlbumList.size();
     }
 
-     static class AlbumHolder extends RecyclerView.ViewHolder{
+      class AlbumHolder extends RecyclerView.ViewHolder{
 
         private ImageView mCoverAlbum;
         private TextView mAlumName;
@@ -65,23 +76,31 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumHolder>
             mCoverAlbum = itemView.findViewById(R.id.album_cover);
             mAlumName = itemView.findViewById(R.id.album_name);
             mArtistName = itemView.findViewById(R.id.artist_name_in_album_list);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    Intent intent = MusicListActivity.newIntent(mContext,mAlbum,null);
+                    mContext.startActivity(intent);
+                }
+            });
         }
 
         public void onBindAlbum(Album album){
             mAlbum = album;
             mAlumName.setText(mAlbum.getAlbumName());
-            mArtistName.setText(mAlbum.getSongsOfAlbum().get(0).getArtistName() + " | "+mAlbum.getSongsOfAlbum().size());
+            Song song = mSongRepository.getSongFromPath(mAlbum.getSongsOfAlbum().get(0));
+            mArtistName.setText(song.getArtistName() + " | "+mAlbum.getSongsOfAlbum().size());
 
             MediaMetadataRetriever mMediaMetadataRetriever = new MediaMetadataRetriever();
-            mMediaMetadataRetriever.setDataSource(mAlbum.getSongsOfAlbum().get(0).getPath());
+            mMediaMetadataRetriever.setDataSource(song.getPath());
             byte[] mPic = mMediaMetadataRetriever.getEmbeddedPicture();
             if (mPic!=null){
                 BitmapFactory.Options bitmapFactory = new BitmapFactory.Options();
                 bitmapFactory.outWidth = mCoverAlbum.getMaxWidth();
                 bitmapFactory.outHeight = mCoverAlbum.getMaxHeight();
                 Bitmap songImage = BitmapFactory.decodeByteArray(mPic, 0, mPic.length, bitmapFactory);
-//            ByteArrayOutputStream out = new ByteArrayOutputStream();
-//            songImage.compress(Bitmap.CompressFormat.PNG,50,out);
                 mCoverAlbum.setImageBitmap(songImage);
             }else mCoverAlbum.setBackgroundResource(R.drawable.default_image_round);
         }

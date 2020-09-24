@@ -9,6 +9,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
@@ -23,6 +24,7 @@ import android.widget.Toast;
 import com.example.musicplayer.R;
 import com.example.musicplayer.controller.fragment.AlbumListFragment;
 import com.example.musicplayer.controller.fragment.ArtistListFragment;
+import com.example.musicplayer.controller.fragment.SingleTrackPlayFragment;
 import com.example.musicplayer.controller.fragment.SongsFragment;
 import com.example.musicplayer.model.Song;
 import com.example.musicplayer.repository.SongRepository;
@@ -35,7 +37,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
-public class MainActivity extends AppCompatActivity implements SongsFragment.InitNavigationPlayMusicCallback {
+public class MainActivity extends AppCompatActivity implements
+        SongsFragment.InitNavigationPlayMusicCallback, SingleTrackPlayFragment.MusicChangeState {
 
     private ViewPager2 mViewPager2;
     private TabLayout mTabLayout;
@@ -53,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements SongsFragment.Ini
     private List<Song> mAllMusic;
     private MusicState mMusicState = MusicState.IS_PAUSE;
     private byte[] mPic;
-    private MediaMetadataRetriever mMediaMetadataRetriever=new MediaMetadataRetriever();
+    private MediaMetadataRetriever mMediaMetadataRetriever = new MediaMetadataRetriever();
 
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -67,6 +70,19 @@ public class MainActivity extends AppCompatActivity implements SongsFragment.Ini
         setSupportActionBar(mToolbar);
         createViewPager();
         configTabWithViewPager();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+//
+//        mMediaMetadataRetriever.setDataSource(this, mSongRepository.getCurrentSong().getUri());
+//        mPic = mMediaMetadataRetriever.getEmbeddedPicture();
+//        if (mPic != null) {
+//            Bitmap songImage = BitmapFactory.decodeByteArray(mPic, 0, mPic.length);
+//            mImageViewSongCover.setImageBitmap(songImage);
+//        } else mImageViewSongCover.setBackgroundResource(R.drawable.default_image_round);
     }
 
     private void findViews() {
@@ -87,7 +103,8 @@ public class MainActivity extends AppCompatActivity implements SongsFragment.Ini
         mCurrentMusicPlaying.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "yep", Toast.LENGTH_SHORT).show();
+                Intent intent = MusicSingleTrackActivity.newIntent(MainActivity.this);
+                startActivity(intent);
             }
         });
         mImageButtonPause.setOnClickListener(new View.OnClickListener() {
@@ -129,6 +146,8 @@ public class MainActivity extends AppCompatActivity implements SongsFragment.Ini
     }
 
 
+
+
     private class ViewPagerAdapter extends FragmentStateAdapter {
 
         public ViewPagerAdapter(@NonNull FragmentActivity fragmentActivity) {
@@ -138,11 +157,11 @@ public class MainActivity extends AppCompatActivity implements SongsFragment.Ini
         @NonNull
         @Override
         public Fragment createFragment(int position) {
-            if (position==0) {
-                return SongsFragment.newInstance();
-            }else if (position == 1){
+            if (position == 0) {
+                return SongsFragment.newInstance(null,null);
+            } else if (position == 1) {
                 return AlbumListFragment.newInstance();
-            }else return ArtistListFragment.newInstance();
+            } else return ArtistListFragment.newInstance();
         }
 
         @Override
@@ -159,13 +178,33 @@ public class MainActivity extends AppCompatActivity implements SongsFragment.Ini
         mTextViewArtist.setText(song.getArtistName());
         mImageButtonPause.setImageResource(R.drawable.pause_round);
         mMusicState = MusicState.IS_PLAYING;
-        mMediaMetadataRetriever.setDataSource(this,song.getUri());
+        mMediaMetadataRetriever.setDataSource(this, song.getUri());
         mPic = mMediaMetadataRetriever.getEmbeddedPicture();
-        if (mPic!=null){
+        if (mPic != null) {
             Bitmap songImage = BitmapFactory.decodeByteArray(mPic, 0, mPic.length);
             mImageViewSongCover.setImageBitmap(songImage);
-        }else mImageViewSongCover.setBackgroundResource(R.drawable.default_image_round);
+        } else mImageViewSongCover.setBackgroundResource(R.drawable.default_image_round);
 
     }
+    @Override
+    public void onClickChangeMusic(UUID uuid) {
+        Song song = mSongRepository.getSong(uuid);
+        if (mMediaPlayer.isPlaying()){
+            mMusicState = MusicState.IS_PLAYING;
+            mImageButtonPause.setImageResource(R.drawable.pause_round);
+        }else{
+            mMusicState = MusicState.IS_PAUSE;
+            mImageButtonPause.setImageResource(R.drawable.play_round);
+        }
+        mTextViewSongName.setText(song.getSongName());
+        mTextViewArtist.setText(song.getArtistName());
+        mMediaMetadataRetriever.setDataSource(this, song.getUri());
+        mPic = mMediaMetadataRetriever.getEmbeddedPicture();
+        if (mPic != null) {
+            Bitmap songImage = BitmapFactory.decodeByteArray(mPic, 0, mPic.length);
+            mImageViewSongCover.setImageBitmap(songImage);
+        } else mImageViewSongCover.setBackgroundResource(R.drawable.default_image_round);
+    }
+
 
 }

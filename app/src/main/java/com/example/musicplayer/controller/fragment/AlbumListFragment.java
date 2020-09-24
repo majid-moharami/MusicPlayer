@@ -61,7 +61,7 @@ public class AlbumListFragment extends Fragment {
             return;
         }
         if (mAdapter == null) {
-            mAdapter = new AlbumAdapter(mAlbumList);
+            mAdapter = new AlbumAdapter(mAlbumList,getActivity());
             mRecyclerView.setAdapter(mAdapter);
         } else {
             mAdapter.setAlbumList(mAlbumList);
