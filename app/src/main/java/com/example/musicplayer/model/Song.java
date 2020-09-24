@@ -1,11 +1,12 @@
 package com.example.musicplayer.model;
 
+import android.graphics.Bitmap;
 import android.net.Uri;
 
 import java.io.Serializable;
 import java.util.UUID;
 
-public class Song implements Serializable {
+public class Song {
 
     private String mSongName;
     private String mArtistName;
@@ -14,13 +15,23 @@ public class Song implements Serializable {
     private Uri mUri;
     private Uri mTrackCover;
     private UUID mUUID;
+    private String mPath;
 
-    public Song(String songName, String artistName,String albumName,Uri uri) {
+    public Song(String songName, String artistName, String albumName, Uri uri, String path) {
         mSongName = songName;
         mArtistName = artistName;
-        mAlbumName=albumName;
+        mAlbumName = albumName;
         mUUID = UUID.randomUUID();
-        mUri=uri;
+        mUri = uri;
+        mPath = path;
+    }
+
+    public String getPath() {
+        return mPath;
+    }
+
+    public void setPath(String path) {
+        mPath = path;
     }
 
     public int getTrackDuration() {

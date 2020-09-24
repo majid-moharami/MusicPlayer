@@ -9,35 +9,33 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
-import android.annotation.SuppressLint;
-import android.content.ContentUris;
-import android.content.res.AssetFileDescriptor;
-import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.view.View;
-import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.musicplayer.R;
+import com.example.musicplayer.controller.fragment.AlbumListFragment;
+import com.example.musicplayer.controller.fragment.ArtistListFragment;
 import com.example.musicplayer.controller.fragment.SongsFragment;
 import com.example.musicplayer.model.Song;
 import com.example.musicplayer.repository.SongRepository;
+import com.example.musicplayer.util.MusicState;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.makeramen.roundedimageview.RoundedImageView;
 
-import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SongsFragment.InitNavigationPlayMusicCallback {
 
     private ViewPager2 mViewPager2;
     private TabLayout mTabLayout;
@@ -49,9 +47,13 @@ public class MainActivity extends AppCompatActivity {
     private ImageView mImageButtonPause;
     private TextView mTextViewArtist;
     private TextView mTextViewSongName;
+    private View mCurrentMusicPlaying;
     private MediaPlayer mMediaPlayer = new MediaPlayer();
     private SongRepository mSongRepository;
     private List<Song> mAllMusic;
+    private MusicState mMusicState = MusicState.IS_PAUSE;
+    private byte[] mPic;
+    private MediaMetadataRetriever mMediaMetadataRetriever=new MediaMetadataRetriever();
 
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -59,7 +61,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mSongRepository = SongRepository.getSongRepository(this);
         findViews();
+        allListener();
         setSupportActionBar(mToolbar);
         createViewPager();
         configTabWithViewPager();
@@ -73,11 +77,36 @@ public class MainActivity extends AppCompatActivity {
         mImageButtonNext = findViewById(R.id.next_button);
         mImageButtonPerv = findViewById(R.id.per_button);
         mImageButtonPause = findViewById(R.id.puse_button);
-        mImageViewSongCover = findViewById(R.id.image);
+        mImageViewSongCover = findViewById(R.id.cover_track);
         mTextViewArtist = findViewById(R.id.artist_name);
         mTextViewSongName = findViewById(R.id.song_name);
+        mCurrentMusicPlaying = findViewById(R.id.current_music_nav);
     }
 
+    private void allListener() {
+        mCurrentMusicPlaying.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(MainActivity.this, "yep", Toast.LENGTH_SHORT).show();
+            }
+        });
+        mImageButtonPause.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mMusicState == MusicState.IS_PAUSE) {
+                    mMusicState = MusicState.IS_PLAYING;
+
+                    mSongRepository.resumeMusic();
+
+                    mImageButtonPause.setImageResource(R.drawable.pause_round);
+                } else {
+                    mMusicState = MusicState.IS_PAUSE;
+                    mSongRepository.stopMusic();
+                    mImageButtonPause.setImageResource(R.drawable.play_round);
+                }
+            }
+        });
+    }
 
     private void configTabWithViewPager() {
         new TabLayoutMediator(mTabLayout, mViewPager2, new TabLayoutMediator.TabConfigurationStrategy() {
@@ -99,6 +128,7 @@ public class MainActivity extends AppCompatActivity {
         // mViewPager2.setPageTransformer(new DepthPageTransformer());
     }
 
+
     private class ViewPagerAdapter extends FragmentStateAdapter {
 
         public ViewPagerAdapter(@NonNull FragmentActivity fragmentActivity) {
@@ -108,7 +138,11 @@ public class MainActivity extends AppCompatActivity {
         @NonNull
         @Override
         public Fragment createFragment(int position) {
-            return SongsFragment.newInstance();
+            if (position==0) {
+                return SongsFragment.newInstance();
+            }else if (position == 1){
+                return AlbumListFragment.newInstance();
+            }else return ArtistListFragment.newInstance();
         }
 
         @Override
@@ -116,4 +150,22 @@ public class MainActivity extends AppCompatActivity {
             return 3;
         }
     }
+
+
+    @Override
+    public void onClick(UUID uuid) {
+        Song song = mSongRepository.getSong(uuid);
+        mTextViewSongName.setText(song.getSongName());
+        mTextViewArtist.setText(song.getArtistName());
+        mImageButtonPause.setImageResource(R.drawable.pause_round);
+        mMusicState = MusicState.IS_PLAYING;
+        mMediaMetadataRetriever.setDataSource(this,song.getUri());
+        mPic = mMediaMetadataRetriever.getEmbeddedPicture();
+        if (mPic!=null){
+            Bitmap songImage = BitmapFactory.decodeByteArray(mPic, 0, mPic.length);
+            mImageViewSongCover.setImageBitmap(songImage);
+        }else mImageViewSongCover.setBackgroundResource(R.drawable.default_image_round);
+
+    }
+
 }

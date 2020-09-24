@@ -4,10 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".controller.fragment.SongsFragment" >
+    tools:context=".controller.fragment.ArtistListFragment">
+
+    <!-- TODO: Update blank fragment layout -->
 
     <com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView
-        android:id="@+id/song_recycler"
+        android:id="@+id/artist_recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#232323"
@@ -23,5 +25,6 @@
         app:fastScrollPopupPosition="adjacent"
         app:fastScrollPopupTextColor="@android:color/primary_text_dark"
         app:fastScrollPopupTextSize="46sp"
-        app:fastScrollThumbColor="#6C6C6C"/>
+        app:fastScrollThumbColor="#6C6C6C" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

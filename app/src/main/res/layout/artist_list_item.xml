@@ -3,15 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="#00FFFFFF">
+    android:layout_height="wrap_content">
 
     <com.makeramen.roundedimageview.RoundedImageView
-        android:id="@+id/cover_track"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:id="@+id/cover_artist"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:layout_margin="8dp"
-        android:layout_marginStart="24dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         android:scaleType="centerCrop"
@@ -19,40 +18,36 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.012"
         app:riv_border_width="0dp"
-        app:riv_corner_radius_bottom_left="10dp"
-        app:riv_corner_radius_bottom_right="10dp"
-        app:riv_corner_radius_top_left="10dp"
-        app:riv_corner_radius_top_right="10dp"
         app:riv_mutate_background="true"
-        app:riv_oval="false" />
+        app:riv_oval="true" />
 
     <TextView
-        android:id="@+id/song_name_list_item"
+        android:id="@+id/artist_name_artist_item"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:textColor="#F6F6F6"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/cover_artist"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="saman jalili" />
+
+    <TextView
+        android:id="@+id/track_count"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
-        android:text="TextView"
-        android:textColor="#F8F8F8"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/cover_track"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/artist_name_list_item"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="TextView"
-        android:textColor="#A6A3A3"
-        android:textSize="14sp"
+        android:layout_marginBottom="8dp"
+        android:textColor="#C5C3C3"
+        android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.058"
-        app:layout_constraintStart_toEndOf="@+id/cover_track"
-        app:layout_constraintTop_toBottomOf="@+id/song_name_list_item"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintStart_toEndOf="@+id/cover_artist"
+        app:layout_constraintTop_toBottomOf="@+id/artist_name_artist_item"
+        app:layout_constraintVertical_bias="0.0"
+        tools:text="18 Track" />
 </androidx.constraintlayout.widget.ConstraintLayout>
