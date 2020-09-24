@@ -9,6 +9,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.Manifest;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -31,11 +32,20 @@ import com.example.musicplayer.repository.SongRepository;
 import com.example.musicplayer.util.MusicState;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.intentfilter.androidpermissions.PermissionManager;
+import com.intentfilter.androidpermissions.models.DeniedPermission;
+import com.intentfilter.androidpermissions.models.DeniedPermissions;
 import com.makeramen.roundedimageview.RoundedImageView;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.EasyPermissions;
+
+import static java.util.Collections.singleton;
 
 public class MainActivity extends AppCompatActivity implements
         SongsFragment.InitNavigationPlayMusicCallback, SingleTrackPlayFragment.MusicChangeState {
@@ -59,17 +69,35 @@ public class MainActivity extends AppCompatActivity implements
     private MediaMetadataRetriever mMediaMetadataRetriever = new MediaMetadataRetriever();
 
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mSongRepository = SongRepository.getSongRepository(this);
-        findViews();
-        allListener();
-        setSupportActionBar(mToolbar);
-        createViewPager();
-        configTabWithViewPager();
+        PermissionManager permissionManager = PermissionManager.getInstance(this);
+        permissionManager.checkPermissions(singleton(Manifest.permission.WRITE_EXTERNAL_STORAGE), new PermissionManager.PermissionRequestListener() {
+            @Override
+            public void onPermissionGranted() {
+                mSongRepository = SongRepository.getSongRepository(MainActivity.this);
+                findViews();
+                allListener();
+                setSupportActionBar(mToolbar);
+                createViewPager();
+                configTabWithViewPager();
+            }
+
+            @Override
+            public void onPermissionDenied(DeniedPermissions deniedPermissions) {
+                String deniedPermissionsText = "Denied: " + Arrays.toString(deniedPermissions.toArray());
+                Toast.makeText(MainActivity.this, deniedPermissionsText, Toast.LENGTH_SHORT).show();
+                MainActivity.this.finish();
+                for (DeniedPermission deniedPermission : deniedPermissions) {
+                    if(deniedPermission.shouldShowRationale()) {
+                        // Display a rationale about why this permission is required
+                    }
+                }
+            }
+        });
+
     }
 
     @Override
@@ -84,6 +112,8 @@ public class MainActivity extends AppCompatActivity implements
 //            mImageViewSongCover.setImageBitmap(songImage);
 //        } else mImageViewSongCover.setBackgroundResource(R.drawable.default_image_round);
     }
+
+
 
     private void findViews() {
         mViewPager2 = findViewById(R.id.view_pager);

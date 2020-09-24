@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.musicplayer.R;
 import com.example.musicplayer.model.Song;
+import com.example.musicplayer.repository.SongRepository;
 import com.makeramen.roundedimageview.RoundedImageView;
 
 import java.io.ByteArrayOutputStream;
@@ -34,6 +35,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.SongHolder> 
         mSongList = songList;
         mPlayMusicCallback = playMusicCallback;
         mContext = context;
+
     }
 
     public List<Song> getSongList() {

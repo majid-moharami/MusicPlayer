@@ -44,5 +44,8 @@ dependencies {
     // Round Image View
     implementation 'com.makeramen:roundedimageview:2.3.0'
 
+    //easy permission
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.intentfilter:android-permissions:2.0.54'
 
 }
