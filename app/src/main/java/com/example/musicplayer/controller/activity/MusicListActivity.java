@@ -34,5 +34,11 @@ public class MusicListActivity extends SingleFragmentActivity {
         );
     }
 
-
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent intent = new Intent();
+        intent.putExtra("song","ok");
+        setResult(RESULT_OK, intent);
+    }
 }

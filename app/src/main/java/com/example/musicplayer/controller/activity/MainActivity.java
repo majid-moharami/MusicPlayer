@@ -1,32 +1,35 @@
 package com.example.musicplayer.controller.activity;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
+
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
-
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.example.musicplayer.R;
+import com.example.musicplayer.adapter.albums.AlbumAdapter;
+import com.example.musicplayer.adapter.artists.ArtistAdapter;
 import com.example.musicplayer.controller.fragment.AlbumListFragment;
 import com.example.musicplayer.controller.fragment.ArtistListFragment;
 import com.example.musicplayer.controller.fragment.SingleTrackPlayFragment;
 import com.example.musicplayer.controller.fragment.SongsFragment;
+import com.example.musicplayer.model.Album;
+import com.example.musicplayer.model.Artist;
 import com.example.musicplayer.model.Song;
 import com.example.musicplayer.repository.SongRepository;
 import com.example.musicplayer.util.MusicState;
@@ -42,14 +45,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import pub.devrel.easypermissions.AfterPermissionGranted;
-import pub.devrel.easypermissions.EasyPermissions;
 
 import static java.util.Collections.singleton;
 
 public class MainActivity extends AppCompatActivity implements
-        SongsFragment.InitNavigationPlayMusicCallback, SingleTrackPlayFragment.MusicChangeState {
+        SongsFragment.InitNavigationPlayMusicCallback, SingleTrackPlayFragment.MusicChangeState,
+        ArtistAdapter.StartMusicListActivity, AlbumAdapter.StartMusicListActivityInAlbum {
 
+    public static final int REQUEST_CODE_START_SINGLE_TRACK_ACTIVITY = 1;
+    public static final int REQUEST_CODE_START_MUSIC_LIST_ACTIVITY_FOR_ARTIST = 2;
+    public static final int REQUEST_CODE_START_MUSIC_LIST_ACTIVITY_ALBUM = 3;
     private ViewPager2 mViewPager2;
     private TabLayout mTabLayout;
     private Toolbar mToolbar;
@@ -79,6 +84,11 @@ public class MainActivity extends AppCompatActivity implements
             public void onPermissionGranted() {
                 mSongRepository = SongRepository.getSongRepository(MainActivity.this);
                 findViews();
+                try {
+                    initUI();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 allListener();
                 setSupportActionBar(mToolbar);
                 createViewPager();
@@ -101,19 +111,19 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
-//
-//        mMediaMetadataRetriever.setDataSource(this, mSongRepository.getCurrentSong().getUri());
-//        mPic = mMediaMetadataRetriever.getEmbeddedPicture();
-//        if (mPic != null) {
-//            Bitmap songImage = BitmapFactory.decodeByteArray(mPic, 0, mPic.length);
-//            mImageViewSongCover.setImageBitmap(songImage);
-//        } else mImageViewSongCover.setBackgroundResource(R.drawable.default_image_round);
+        //TODO
+//        if (resultCode  != Activity.RESULT_OK || data==null )
+//            return;
+
+        if (requestCode == REQUEST_CODE_START_SINGLE_TRACK_ACTIVITY ||
+                requestCode == REQUEST_CODE_START_MUSIC_LIST_ACTIVITY_FOR_ARTIST ||
+                requestCode == REQUEST_CODE_START_MUSIC_LIST_ACTIVITY_ALBUM){
+           updateNavBar();
+        }
     }
-
-
 
     private void findViews() {
         mViewPager2 = findViewById(R.id.view_pager);
@@ -129,12 +139,19 @@ public class MainActivity extends AppCompatActivity implements
         mCurrentMusicPlaying = findViewById(R.id.current_music_nav);
     }
 
+    private void initUI() throws IOException {
+        mSongRepository.setCurrentSong(mSongRepository.getSongList().get(0));
+        mSongRepository.playMusic();
+        mSongRepository.stopMusic();
+        updateNavBar();
+    }
+
     private void allListener() {
         mCurrentMusicPlaying.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = MusicSingleTrackActivity.newIntent(MainActivity.this);
-                startActivity(intent);
+                startActivityForResult(intent , REQUEST_CODE_START_SINGLE_TRACK_ACTIVITY);
             }
         });
         mImageButtonPause.setOnClickListener(new View.OnClickListener() {
@@ -153,6 +170,30 @@ public class MainActivity extends AppCompatActivity implements
                 }
             }
         });
+    }
+
+    private void updateNavBar(){
+        Song song = mSongRepository.getCurrentSong();
+        mMediaPlayer = mSongRepository.getMediaPlayer();
+        mTextViewSongName.setText(song.getSongName());
+        mTextViewArtist.setText(song.getArtistName());
+
+        if (mMediaPlayer.isPlaying()) {
+            mMusicState = MusicState.IS_PLAYING;
+            mImageButtonPause.setImageResource(R.drawable.pause_round);
+        }
+        else {
+            mMusicState = MusicState.IS_PAUSE;
+            mImageButtonPause.setImageResource(R.drawable.play_round);
+        }
+
+
+        mMediaMetadataRetriever.setDataSource(this, song.getUri());
+        mPic = mMediaMetadataRetriever.getEmbeddedPicture();
+        if (mPic != null) {
+            Bitmap songImage = BitmapFactory.decodeByteArray(mPic, 0, mPic.length);
+            mImageViewSongCover.setImageBitmap(songImage);
+        } else mImageViewSongCover.setBackgroundResource(R.drawable.default_image_round);
     }
 
     private void configTabWithViewPager() {
@@ -236,5 +277,15 @@ public class MainActivity extends AppCompatActivity implements
         } else mImageViewSongCover.setBackgroundResource(R.drawable.default_image_round);
     }
 
+    @Override
+    public void startForArtistCallBack(Artist artist) {
+        Intent intent = MusicListActivity.newIntent(this,null,artist);
+        startActivityForResult(intent, REQUEST_CODE_START_MUSIC_LIST_ACTIVITY_FOR_ARTIST);
+    }
+    @Override
+    public void startForAlbumCallBack(Album album) {
+        Intent intent = MusicListActivity.newIntent(this,album,null);
+        startActivityForResult(intent, REQUEST_CODE_START_MUSIC_LIST_ACTIVITY_ALBUM);
+    }
 
 }

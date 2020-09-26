@@ -41,12 +41,12 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:textColor="#FDFBFB"
-        android:textSize="18sp"
+        android:textSize="14sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/cover_track"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.275"
+        app:layout_constraintVertical_bias="0.238"
         tools:text="Bargashtam" />
 
     <TextView
@@ -65,12 +65,13 @@
         android:id="@+id/next_button"
         android:layout_width="20dp"
         android:layout_height="20dp"
-        android:layout_marginBottom="20dp"
+        android:layout_marginEnd="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
+
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.866"
-        app:layout_constraintStart_toEndOf="@+id/song_name"
-        app:layout_constraintTop_toTopOf="@+id/panel_color"
+        app:layout_constraintHorizontal_bias="0.959"
+        app:layout_constraintStart_toStartOf="@+id/current_music_nav"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.487"
         app:srcCompat="@drawable/next_small"
         app:tint="#F9FAF8" />
@@ -79,12 +80,13 @@
         android:id="@+id/per_button"
         android:layout_width="20dp"
         android:layout_height="20dp"
-        android:layout_marginBottom="20dp"
+        android:layout_marginEnd="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/next_button"
-        app:layout_constraintHorizontal_bias="0.666"
-        app:layout_constraintStart_toEndOf="@+id/song_name"
-        app:layout_constraintTop_toTopOf="@+id/panel_color"
+        app:layout_constraintHorizontal_bias="0.855"
+
+        app:layout_constraintStart_toStartOf="@+id/current_music_nav"
+        app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/pref"
         app:tint="#F7F8F6" />
 

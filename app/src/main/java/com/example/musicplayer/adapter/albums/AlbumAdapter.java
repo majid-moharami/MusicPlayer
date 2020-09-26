@@ -30,11 +30,13 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumHolder>
     private List<Album> mAlbumList = new ArrayList<>();
     private Context mContext;
     private SongRepository mSongRepository ;
+    private StartMusicListActivityInAlbum mStartMusicListActivityInAlbum;
 
     public AlbumAdapter(List<Album> albumList,Context context) {
         mAlbumList = albumList;
         mContext = context;
         mSongRepository = SongRepository.getSongRepository(mContext);
+        mStartMusicListActivityInAlbum = (StartMusicListActivityInAlbum) context;
     }
 
     public List<Album> getAlbumList() {
@@ -81,8 +83,10 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumHolder>
                 @Override
                 public void onClick(View v) {
 
-                    Intent intent = MusicListActivity.newIntent(mContext,mAlbum,null);
-                    mContext.startActivity(intent);
+//                    Intent intent = MusicListActivity.newIntent(mContext,mAlbum,null);
+//                    mContext.startActivity(intent);
+                    mStartMusicListActivityInAlbum.startForAlbumCallBack(mAlbum);
+
                 }
             });
         }
@@ -104,5 +108,9 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumHolder>
                 mCoverAlbum.setImageBitmap(songImage);
             }else mCoverAlbum.setBackgroundResource(R.drawable.default_image_round);
         }
+    }
+
+    public interface StartMusicListActivityInAlbum{
+        void startForAlbumCallBack(Album album);
     }
 }

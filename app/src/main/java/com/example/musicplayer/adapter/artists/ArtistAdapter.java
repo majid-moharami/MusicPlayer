@@ -28,12 +28,14 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistHold
 
     private List<Artist> mArtists = new ArrayList<>();
     private SongRepository mSongRepository;
+    private StartMusicListActivity mStartMusicListActivity;
     private Context mContext;
 
     public ArtistAdapter(List<Artist> artists , Context context) {
         mContext =context;
         mArtists = artists;
         mSongRepository = SongRepository.getSongRepository(mContext);
+        mStartMusicListActivity = (StartMusicListActivity) context;
     }
 
     public List<Artist> getArtists() {
@@ -76,8 +78,9 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistHold
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = MusicListActivity.newIntent(mContext,null,mArtist);
-                    mContext.startActivity(intent);
+//                    Intent intent = MusicListActivity.newIntent(mContext,null,mArtist);
+//                    mContext.startActivity(intent);
+                    mStartMusicListActivity.startForArtistCallBack(mArtist);
                 }
             });
         }
@@ -100,5 +103,9 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistHold
                 mCoverArtist.setImageBitmap(songImage);
             }else mCoverArtist.setBackgroundResource(R.drawable.default_image_round);
         }
+    }
+
+    public interface StartMusicListActivity{
+        void startForArtistCallBack(Artist artist);
     }
 }

@@ -3,11 +3,13 @@ package com.example.musicplayer.controller.fragment;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.AnimationDrawable;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
 import android.os.Handler;
@@ -47,6 +49,7 @@ public class SingleTrackPlayFragment extends Fragment {
     private SeekBar mSeekBar;
     private ImageView mPause,mNext,mPrevious;
     private TextView mCurrentTime,mTrackTime,mTrackTitle,mTrackArtist;
+    private ConstraintLayout mLayout;
 
     public static SingleTrackPlayFragment newInstance() {
         SingleTrackPlayFragment fragment = new SingleTrackPlayFragment();
@@ -66,6 +69,8 @@ public class SingleTrackPlayFragment extends Fragment {
             mMusicState = MusicState.IS_PLAYING;
         }else mMusicState = MusicState.IS_PAUSE;
         mHandler = new Handler();
+
+
     }
 
     @Override
@@ -74,6 +79,10 @@ public class SingleTrackPlayFragment extends Fragment {
         // Inflate the layout for this fragment
         View view =  inflater.inflate(R.layout.fragment_single_track_play, container, false);
         findViews(view);
+        AnimationDrawable frameAnimation = (AnimationDrawable) mLayout.getBackground();
+        frameAnimation.setEnterFadeDuration(2000);
+        frameAnimation.setExitFadeDuration(4000);
+        frameAnimation.start();
         initUI();
         allListener();
         return view;
@@ -98,6 +107,7 @@ public class SingleTrackPlayFragment extends Fragment {
         mPause = view.findViewById(R.id.resume_pause_single_track);
         mNext = view.findViewById(R.id.next_button_single_track);
         mPrevious = view.findViewById(R.id.per_button_single_track);
+        mLayout = view.findViewById(R.id.root);
     }
 
     private void allListener(){
@@ -107,18 +117,6 @@ public class SingleTrackPlayFragment extends Fragment {
                 if(mMediaPlayer != null && fromUser){
                     mMediaPlayer.seekTo(progress * 1000);
                 }
-
-//                int d = mMediaPlayer.getDuration()/1000;
-//                assert mMediaPlayer != null;
-//                if (progress==d){
-//                    try {
-//                        mRepository.playNextMusic();
-//                        mMediaPlayer = mRepository.getMediaPlayer();
-//                        initUI();
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
             }
 
             @Override
@@ -207,20 +205,39 @@ public class SingleTrackPlayFragment extends Fragment {
 
     private void connectTrackToSeekBar() {
         mSeekBar.setMax(mMediaPlayer.getDuration() / 1000);
-        mRunnable = new Runnable() {
+        getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (mMediaPlayer != null) {
-                    int mCurrentPosition = mMediaPlayer.getCurrentPosition() / 1000; // In milliseconds
+                if(mMediaPlayer != null){
+                    int mCurrentPosition = mMediaPlayer.getCurrentPosition() / 1000;
                     mSeekBar.setProgress(mCurrentPosition);
                 }
-                mHandler.postDelayed(mRunnable, 1000);
+                mHandler.postDelayed(this, 1000);
             }
-        };
-        mHandler.postDelayed(mRunnable, 1000);
+        });
+
+//        mSeekBar.setMax(mMediaPlayer.getDuration() / 1000);
+//        mRunnable = new Runnable() {
+//            @Override
+//            public void run() {
+//                if (mMediaPlayer != null) {
+//                    int mCurrentPosition = mMediaPlayer.getCurrentPosition() / 1000; // In milliseconds
+//                    mSeekBar.setProgress(mCurrentPosition);
+//                }
+//                //mHandler.postDelayed(mRunnable, 1000);
+//            }
+//        };
+//        mHandler.postDelayed(mRunnable, 1000);
     }
 
     public interface MusicChangeState {
         void onClickChangeMusic(UUID uuid);
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mRunnable=null;
+        mMediaPlayer=null;
     }
 }
