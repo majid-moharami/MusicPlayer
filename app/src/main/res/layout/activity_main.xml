@@ -12,32 +12,47 @@
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#00FFFFFF">
+        android:background="#00FFFFFF"
+        android:fitsSystemWindows="true">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/music_toolbar"
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:id="@+id/toolbar_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#171717"
-            app:layout_scrollFlags="scroll|enterAlways"
-            app:title="Music Player"
-            app:titleTextColor="#FFFFFF"
-            />
+            app:layout_scrollFlags="scroll|snap"
+            app:toolbarId="@id/music_toolbar">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/music_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="#171717"
+                app:layout_scrollFlags="scroll|enterAlways"
+                />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:layout_marginStart="20dp"
+                android:gravity="center|start"
+                android:text="@string/app_name"
+                android:textColor="@android:color/background_light"
+                android:textSize="18sp" />
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tab_bar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginEnd="12dp"
             android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
             android:background="#171717"
             android:scrollbarSize="8dp"
             app:tabIndicator="@drawable/tab_indcator"
             app:tabIndicatorColor="#B7B8B5"
             app:tabIndicatorHeight="3dp"
             app:tabMaxWidth="0dp"
-            app:tabTextColor="#FFFFFF"
-            />
+            app:tabTextColor="#FFFFFF" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

@@ -86,6 +86,7 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumHolder>
 //                    Intent intent = MusicListActivity.newIntent(mContext,mAlbum,null);
 //                    mContext.startActivity(intent);
                     mStartMusicListActivityInAlbum.startForAlbumCallBack(mAlbum);
+                    mSongRepository.setIsMain(false);
 
                 }
             });

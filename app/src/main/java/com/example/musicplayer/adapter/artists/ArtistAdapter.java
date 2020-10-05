@@ -81,6 +81,7 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistHold
 //                    Intent intent = MusicListActivity.newIntent(mContext,null,mArtist);
 //                    mContext.startActivity(intent);
                     mStartMusicListActivity.startForArtistCallBack(mArtist);
+                    mSongRepository.setIsMain(false);
                 }
             });
         }

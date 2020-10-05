@@ -19,6 +19,7 @@ import com.example.musicplayer.model.Album;
 import com.example.musicplayer.model.Artist;
 import com.example.musicplayer.model.Song;
 import com.example.musicplayer.repository.SongRepository;
+import com.example.musicplayer.util.PlayMusicRole;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.io.IOException;
@@ -68,6 +69,7 @@ public class SongsFragment extends Fragment implements SongsAdapter.PlayMusicCal
         Artist artist = (Artist) getArguments().getSerializable(ARGS_KEY_ARTIST);
         if (album ==null&& artist==null){
             mAllMusic = mSongRepository.getSongList();
+            mSongRepository.setMusicRole(PlayMusicRole.ALL);
         }else {
             if (album != null) {
                 if (album.getSongsOfAlbum().size()!=0){
@@ -78,6 +80,8 @@ public class SongsFragment extends Fragment implements SongsAdapter.PlayMusicCal
                             }
                         }
                     }
+                    mSongRepository.setCurrentAlbumSongs(mAllMusic);
+                    mSongRepository.setMusicRole(PlayMusicRole.ALBUM);
                 }
                     //mAllMusic = album.getSongsOfAlbum();
             } else if (artist != null ) {
@@ -89,6 +93,8 @@ public class SongsFragment extends Fragment implements SongsAdapter.PlayMusicCal
                             }
                         }
                     }
+                    mSongRepository.setCurrentArtistSongs(mAllMusic);
+                    mSongRepository.setMusicRole(PlayMusicRole.ARTIST);
                 }
                     //mAllMusic = artist.getSongsOfArtist();
             }
@@ -138,5 +144,11 @@ public class SongsFragment extends Fragment implements SongsAdapter.PlayMusicCal
 
     public interface InitNavigationPlayMusicCallback {
         void onClick(UUID uuid);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mSongRepository.setIsMain(true);
     }
 }

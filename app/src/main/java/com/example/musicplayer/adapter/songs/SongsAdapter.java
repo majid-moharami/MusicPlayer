@@ -14,8 +14,11 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.musicplayer.R;
+import com.example.musicplayer.controller.activity.SingleFragmentActivity;
+import com.example.musicplayer.controller.fragment.SingleTrackPlayFragment;
 import com.example.musicplayer.model.Song;
 import com.example.musicplayer.repository.SongRepository;
+import com.example.musicplayer.util.PlayMusicRole;
 import com.makeramen.roundedimageview.RoundedImageView;
 
 import java.io.ByteArrayOutputStream;
@@ -30,12 +33,13 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.SongHolder> 
     private List<Song> mSongList = new ArrayList<>();
     private PlayMusicCallback mPlayMusicCallback;
     private Context mContext;
+    private SongRepository mSongRepository;
 
     public SongsAdapter(List<Song> songList, PlayMusicCallback playMusicCallback, Context context) {
         mSongList = songList;
         mPlayMusicCallback = playMusicCallback;
         mContext = context;
-
+        mSongRepository = SongRepository.getSongRepository(mContext);
     }
 
     public List<Song> getSongList() {
@@ -80,13 +84,16 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.SongHolder> 
             super(itemView);
 
             mSongCoverImage = itemView.findViewById(R.id.cover_track);
-            mSongTitle = itemView.findViewById(R.id.song_name_list_item);
+           mSongTitle = itemView.findViewById(R.id.song_name_list_item);
             mSongArtist = itemView.findViewById(R.id.artist_name_list_item);
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     try {
                         mPlayMusicCallback.onClick(mSong.getUUID());
+                        if (mSongRepository.isMain()){
+                            mSongRepository.setMusicRole(PlayMusicRole.ALL);
+                        }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -98,6 +105,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.SongHolder> 
             mSong = song;
             mSongTitle.setText(mSong.getSongName());
             mSongArtist.setText(mSong.getArtistName());
+            
             MediaMetadataRetriever mMediaMetadataRetriever = new MediaMetadataRetriever();
             mMediaMetadataRetriever.setDataSource(song.getPath());
             byte[] mPic = mMediaMetadataRetriever.getEmbeddedPicture();
