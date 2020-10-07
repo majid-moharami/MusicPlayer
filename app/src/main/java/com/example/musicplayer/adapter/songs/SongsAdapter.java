@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
-import android.media.MediaPlayer;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,16 +12,14 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.musicplayer.R;
-import com.example.musicplayer.controller.activity.SingleFragmentActivity;
-import com.example.musicplayer.controller.fragment.SingleTrackPlayFragment;
 import com.example.musicplayer.model.Song;
 import com.example.musicplayer.repository.SongRepository;
 import com.example.musicplayer.util.PlayMusicRole;
 import com.makeramen.roundedimageview.RoundedImageView;
+import com.squareup.picasso.Picasso;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -84,14 +81,14 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.SongHolder> 
             super(itemView);
 
             mSongCoverImage = itemView.findViewById(R.id.cover_track);
-           mSongTitle = itemView.findViewById(R.id.song_name_list_item);
+            mSongTitle = itemView.findViewById(R.id.song_name_list_item);
             mSongArtist = itemView.findViewById(R.id.artist_name_list_item);
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     try {
                         mPlayMusicCallback.onClick(mSong.getUUID());
-                        if (mSongRepository.isMain()){
+                        if (mSongRepository.isMain()) {
                             mSongRepository.setMusicRole(PlayMusicRole.ALL);
                         }
                     } catch (IOException e) {
@@ -105,17 +102,30 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.SongHolder> 
             mSong = song;
             mSongTitle.setText(mSong.getSongName());
             mSongArtist.setText(mSong.getArtistName());
-            
-            MediaMetadataRetriever mMediaMetadataRetriever = new MediaMetadataRetriever();
-            mMediaMetadataRetriever.setDataSource(song.getPath());
-            byte[] mPic = mMediaMetadataRetriever.getEmbeddedPicture();
-            if (mPic!=null){
-                BitmapFactory.Options bitmapFactory = new BitmapFactory.Options();
-                bitmapFactory.outWidth = mSongCoverImage.getMaxWidth();
-                bitmapFactory.outHeight = mSongCoverImage.getMaxHeight();
-                Bitmap songImage = BitmapFactory.decodeByteArray(mPic, 0, mPic.length, bitmapFactory);
-                mSongCoverImage.setImageBitmap(songImage);
-            }else mSongCoverImage.setBackgroundResource(R.drawable.default_image_round);
+            //Glide.with(mContext).load(mSong.getPath()).into(mSongCoverImage);
+//            Picasso.get()
+//                    .load(mSong.getUri())
+//                    .into(mSongCoverImage);
+            final Bitmap[] songImage = new Bitmap[1];
+            new Thread(new Runnable() {
+                public void run() {
+                    MediaMetadataRetriever mMediaMetadataRetriever = new MediaMetadataRetriever();
+                    mMediaMetadataRetriever.setDataSource(mSong.getPath());
+                    byte[] mPic = mMediaMetadataRetriever.getEmbeddedPicture();
+                    BitmapFactory.Options bitmapFactory = new BitmapFactory.Options();
+                    songImage[0] = BitmapFactory.decodeByteArray(mPic, 0, mPic.length);
+                }
+            }).start();
+
+            Glide.with(mContext).load(songImage[0]).into(mSongCoverImage);
+//
+//            if (mPic != null) {
+//                BitmapFactory.Options bitmapFactory = new BitmapFactory.Options();
+//                bitmapFactory.outWidth = mSongCoverImage.getMaxWidth();
+//                bitmapFactory.outHeight = mSongCoverImage.getMaxHeight();
+//                Bitmap songImage = BitmapFactory.decodeByteArray(mPic, 0, mPic.length, bitmapFactory);
+//                mSongCoverImage.setImageBitmap(songImage);
+//            } else mSongCoverImage.setBackgroundResource(R.drawable.default_image_round);
 
         }
     }
