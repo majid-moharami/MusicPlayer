@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,11 +15,13 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.musicplayer.R;
+import com.example.musicplayer.adapter.albums.AlbumAdapter;
 import com.example.musicplayer.controller.activity.MusicListActivity;
 import com.example.musicplayer.model.Album;
 import com.example.musicplayer.model.Artist;
 import com.example.musicplayer.model.Song;
 import com.example.musicplayer.repository.SongRepository;
+import com.example.musicplayer.util.SongBitmapLoader;
 import com.makeramen.roundedimageview.RoundedImageView;
 
 import java.util.ArrayList;
@@ -30,12 +33,25 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistHold
     private SongRepository mSongRepository;
     private StartMusicListActivity mStartMusicListActivity;
     private Context mContext;
+    private Handler mHandler = new android.os.Handler();
+    private SongBitmapLoader<ArtistHolder> mSongBitmapLoader;
 
     public ArtistAdapter(List<Artist> artists , Context context) {
         mContext =context;
         mArtists = artists;
         mSongRepository = SongRepository.getSongRepository(mContext);
         mStartMusicListActivity = (StartMusicListActivity) context;
+
+        mSongBitmapLoader = new SongBitmapLoader<>(mHandler);
+        mSongBitmapLoader.start();
+        mSongBitmapLoader.getLooper();
+
+        mSongBitmapLoader.setSetBitMap(new SongBitmapLoader.ListenerSetBitMap<ArtistHolder>() {
+            @Override
+            public void listenerSet(ArtistHolder holder, Bitmap bitmap) {
+                holder.bindBitMap(bitmap);
+            }
+        });
     }
 
     public List<Artist> getArtists() {
@@ -92,17 +108,24 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistHold
             mTrackCount.setText(mArtist.getSongsOfArtist().size()+ " Track");
             MediaMetadataRetriever mMediaMetadataRetriever = new MediaMetadataRetriever();
             Song song = mSongRepository.getSongFromPath(mArtist.getSongsOfArtist().get(0));
-            mMediaMetadataRetriever.setDataSource(song.getPath());
-            byte[] mPic = mMediaMetadataRetriever.getEmbeddedPicture();
-            if (mPic!=null){
-                BitmapFactory.Options bitmapFactory = new BitmapFactory.Options();
-                bitmapFactory.outWidth = mCoverArtist.getMaxWidth();
-                bitmapFactory.outHeight = mCoverArtist.getMaxHeight();
-                Bitmap songImage = BitmapFactory.decodeByteArray(mPic, 0, mPic.length, bitmapFactory);
-//            ByteArrayOutputStream out = new ByteArrayOutputStream();
-//            songImage.compress(Bitmap.CompressFormat.PNG,50,out);
-                mCoverArtist.setImageBitmap(songImage);
-            }else mCoverArtist.setBackgroundResource(R.drawable.default_image_round);
+
+            mCoverArtist.setImageResource(R.mipmap.ic_empty_cover_foreground);
+
+            mSongBitmapLoader.messageCreator(this , song.getPath());
+//            mMediaMetadataRetriever.setDataSource(song.getPath());
+//            byte[] mPic = mMediaMetadataRetriever.getEmbeddedPicture();
+//            if (mPic!=null){
+//                BitmapFactory.Options bitmapFactory = new BitmapFactory.Options();
+//                bitmapFactory.outWidth = mCoverArtist.getMaxWidth();
+//                bitmapFactory.outHeight = mCoverArtist.getMaxHeight();
+//                Bitmap songImage = BitmapFactory.decodeByteArray(mPic, 0, mPic.length, bitmapFactory);
+////            ByteArrayOutputStream out = new ByteArrayOutputStream();
+////            songImage.compress(Bitmap.CompressFormat.PNG,50,out);
+//                mCoverArtist.setImageBitmap(songImage);
+//            }else mCoverArtist.setBackgroundResource(R.drawable.default_image_round);
+        }
+        private void bindBitMap(Bitmap bitmap){
+            mCoverArtist.setImageBitmap(bitmap);
         }
     }
 

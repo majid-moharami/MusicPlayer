@@ -37,8 +37,6 @@ public class SongLoader {
             int songArtist = songCursor.getColumnIndex(MediaStore.Audio.Media.ARTIST);
             int songAlbum = songCursor.getColumnIndex(MediaStore.Audio.Media.ALBUM);
             int path = songCursor.getColumnIndex(MediaStore.Audio.Media.DATA);
-
-
             do {
 
                 String trackName = songCursor.getString(songTitle);
@@ -47,12 +45,7 @@ public class SongLoader {
                 String trackPath = songCursor.getString(path);
                 String trackId = songCursor.getString(songCursor.getColumnIndex(MediaStore.Audio.Media._ID));
                 Uri musicUri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, Long.parseLong(trackId));
-               tempAudioList.add(new Song(
-                       trackName,
-                       trackArtist,
-                       trackAlbum,
-                       musicUri,
-                       trackPath)
+               tempAudioList.add(new Song(trackName, trackArtist, trackAlbum, musicUri, trackPath)
                );
             } while (songCursor.moveToNext());
             songCursor.close();

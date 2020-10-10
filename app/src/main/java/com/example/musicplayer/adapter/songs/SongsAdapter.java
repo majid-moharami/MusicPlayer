@@ -1,12 +1,15 @@
 package com.example.musicplayer.adapter.songs;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -17,13 +20,14 @@ import com.example.musicplayer.R;
 import com.example.musicplayer.model.Song;
 import com.example.musicplayer.repository.SongRepository;
 import com.example.musicplayer.util.PlayMusicRole;
+import com.example.musicplayer.util.SongBitmapLoader;
 import com.makeramen.roundedimageview.RoundedImageView;
-import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
 
 public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.SongHolder> {
 
@@ -31,12 +35,27 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.SongHolder> 
     private PlayMusicCallback mPlayMusicCallback;
     private Context mContext;
     private SongRepository mSongRepository;
+    private Handler mHandler = new android.os.Handler();
+
+    private SongBitmapLoader<SongHolder> mSongBitmapLoader;
 
     public SongsAdapter(List<Song> songList, PlayMusicCallback playMusicCallback, Context context) {
         mSongList = songList;
         mPlayMusicCallback = playMusicCallback;
         mContext = context;
         mSongRepository = SongRepository.getSongRepository(mContext);
+
+
+        mSongBitmapLoader = new SongBitmapLoader<>(mHandler);
+        mSongBitmapLoader.start();
+        mSongBitmapLoader.getLooper();
+
+        mSongBitmapLoader.setSetBitMap(new SongBitmapLoader.ListenerSetBitMap<SongHolder>() {
+            @Override
+            public void listenerSet(SongHolder holder, Bitmap bitmap) {
+                holder.bindBitMap(bitmap);
+            }
+        });
     }
 
     public List<Song> getSongList() {
@@ -72,7 +91,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.SongHolder> 
 
     public class SongHolder extends RecyclerView.ViewHolder {
 
-        private RoundedImageView mSongCoverImage;
+        private ImageView mSongCoverImage;
         private TextView mSongTitle;
         private TextView mSongArtist;
         private Song mSong;
@@ -102,22 +121,35 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.SongHolder> 
             mSong = song;
             mSongTitle.setText(mSong.getSongName());
             mSongArtist.setText(mSong.getArtistName());
+            mSongCoverImage.setImageResource(R.mipmap.ic_empty_cover_foreground);
+
+            mSongBitmapLoader.messageCreator(this , mSong.getPath());
+
+
             //Glide.with(mContext).load(mSong.getPath()).into(mSongCoverImage);
 //            Picasso.get()
 //                    .load(mSong.getUri())
 //                    .into(mSongCoverImage);
-            final Bitmap[] songImage = new Bitmap[1];
-            new Thread(new Runnable() {
-                public void run() {
-                    MediaMetadataRetriever mMediaMetadataRetriever = new MediaMetadataRetriever();
-                    mMediaMetadataRetriever.setDataSource(mSong.getPath());
-                    byte[] mPic = mMediaMetadataRetriever.getEmbeddedPicture();
-                    BitmapFactory.Options bitmapFactory = new BitmapFactory.Options();
-                    songImage[0] = BitmapFactory.decodeByteArray(mPic, 0, mPic.length);
-                }
-            }).start();
-
-            Glide.with(mContext).load(songImage[0]).into(mSongCoverImage);
+//            final Bitmap[] songImage = new Bitmap[1];
+//            new Thread(new Runnable() {
+//                public void run() {
+//                    MediaMetadataRetriever mMediaMetadataRetriever = new MediaMetadataRetriever();
+//                    mMediaMetadataRetriever.setDataSource(mSong.getPath());
+//                    final byte[] mPic = mMediaMetadataRetriever.getEmbeddedPicture();
+//                    final BitmapFactory.Options bitmapFactory = new BitmapFactory.Options();
+//                    bitmapFactory.outWidth = mSongCoverImage.getMaxWidth();
+//                    bitmapFactory.outHeight = mSongCoverImage.getMaxHeight();
+//                    //songImage[0] = BitmapFactory.decodeByteArray(mPic, 0, mPic.length);
+//                    ((Activity) mContext).runOnUiThread(new Runnable() {
+//                        public void run() {
+//                            if (mPic != null)
+//                                Glide.with(mContext).load(BitmapFactory.decodeByteArray(mPic, 0, mPic.length,bitmapFactory)).into(mSongCoverImage);
+//
+//                        }
+//                    });
+//                }
+//
+//            }).start();
 //
 //            if (mPic != null) {
 //                BitmapFactory.Options bitmapFactory = new BitmapFactory.Options();
@@ -128,5 +160,9 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.SongHolder> 
 //            } else mSongCoverImage.setBackgroundResource(R.drawable.default_image_round);
 
         }
+        private void bindBitMap(Bitmap bitmap){
+            mSongCoverImage.setImageBitmap(bitmap);
+        }
     }
+
 }

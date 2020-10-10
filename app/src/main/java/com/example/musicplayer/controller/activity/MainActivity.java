@@ -246,7 +246,7 @@ public class MainActivity extends AppCompatActivity implements
         if (mPic != null) {
             Bitmap songImage = BitmapFactory.decodeByteArray(mPic, 0, mPic.length);
             mImageViewSongCover.setImageBitmap(songImage);
-        } else mImageViewSongCover.setBackgroundResource(R.drawable.default_image_round);
+        } else mImageViewSongCover.setImageResource(R.mipmap.ic_empty_cover_foreground);
     }
 
     private void configTabWithViewPager() {
