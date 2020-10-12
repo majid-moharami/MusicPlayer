@@ -1,15 +1,16 @@
 package com.example.musicplayer.repository;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 
 import com.example.musicplayer.model.Album;
 import com.example.musicplayer.model.Artist;
+import com.example.musicplayer.model.Folder;
 import com.example.musicplayer.model.Song;
+import com.example.musicplayer.util.FolderSeparator;
 import com.example.musicplayer.util.MusicState;
 import com.example.musicplayer.util.PlayMusicRole;
+import com.example.musicplayer.util.PriorityOfSongsList;
 import com.example.musicplayer.util.SongLoader;
 
 import java.io.IOException;
@@ -24,12 +25,15 @@ public class SongRepository {
     private List<Song> mSongList;
     private List<Song> mCurrentArtistSongs = new ArrayList<>();
     private List<Song> mCurrentAlbumSongs = new ArrayList<>();
+    private List<Song> mCurrentFolderSongs = new ArrayList<>();
     private MediaPlayer mMediaPlayer = new MediaPlayer();
     private Song mCurrentSong;
     private boolean mIsMain = true;
     private MusicState mShuffleState = MusicState.IS_NOT_SHUFFLE;
     private MusicState mRepeatState = MusicState.IS_NOT_REPEAT;
     private PlayMusicRole mMusicRole = PlayMusicRole.ALL;
+    private PriorityOfSongsList mPriority = PriorityOfSongsList.ALL;
+
     private int mCurrentSecondOfMusic;
 
 
@@ -69,13 +73,16 @@ public class SongRepository {
 
     public void playMusic() throws IOException {
         if (mShuffleState == MusicState.IS_SHUFFLE) {
-            if (mMusicRole == PlayMusicRole.ALBUM){
+            if (mMusicRole == PlayMusicRole.ALBUM && mPriority == PriorityOfSongsList.ALBUM) {
                 Random random = new Random();
                 mCurrentSong = mCurrentAlbumSongs.get(random.nextInt(mCurrentAlbumSongs.size()));
-            }else if (mMusicRole == PlayMusicRole.ARTIST){
+            } else if (mMusicRole == PlayMusicRole.ARTIST && mPriority == PriorityOfSongsList.ARTIST) {
                 Random random = new Random();
                 mCurrentSong = mCurrentArtistSongs.get(random.nextInt(mCurrentArtistSongs.size()));
-            }else {
+            } else if (mMusicRole == PlayMusicRole.FOLDER && mPriority == PriorityOfSongsList.FOLDER) {
+                Random random = new Random();
+                mCurrentSong = mCurrentFolderSongs.get(random.nextInt(mCurrentFolderSongs.size()));
+            } else {
                 Random random = new Random();
                 mCurrentSong = mSongList.get(random.nextInt(mSongList.size()));
             }
@@ -92,8 +99,8 @@ public class SongRepository {
         mMediaPlayer.start();
     }
 
-    public int getPosition(Song song){
-        for (int i = 0; i < mSongList.size() ; i++) {
+    public int getPosition(Song song) {
+        for (int i = 0; i < mSongList.size(); i++) {
             if (mSongList.get(i).getUUID().equals(song.getUUID()))
                 return i;
         }
@@ -143,11 +150,15 @@ public class SongRepository {
         return albumList;
     }
 
+    public List<Folder> getAllFolder() {
+        return FolderSeparator.getFolders(mSongList);
+    }
+
     public void playNextMusic() throws IOException {
-        if (mMusicRole == PlayMusicRole.ALBUM) {
+        if ( mPriority == PriorityOfSongsList.ALBUM) {
             for (int i = 0; i < mCurrentAlbumSongs.size(); i++) {
                 if (mCurrentAlbumSongs.get(i).getUUID().equals(mCurrentSong.getUUID())) {
-                    if (i != mCurrentAlbumSongs.size()-1)
+                    if (i != mCurrentAlbumSongs.size() - 1)
                         setCurrentSong(mCurrentAlbumSongs.get(i + 1));
                     else
                         setCurrentSong(mCurrentAlbumSongs.get(0));
@@ -155,10 +166,10 @@ public class SongRepository {
                     return;
                 }
             }
-        } else if (mMusicRole == PlayMusicRole.ARTIST) {
+        } else if (mPriority == PriorityOfSongsList.ARTIST) {
             for (int i = 0; i < mCurrentArtistSongs.size(); i++) {
                 if (mCurrentArtistSongs.get(i).getUUID().equals(mCurrentSong.getUUID())) {
-                    if (i != mCurrentArtistSongs.size()-1)
+                    if (i != mCurrentArtistSongs.size() - 1)
                         setCurrentSong(mCurrentArtistSongs.get(i + 1));
                     else
                         setCurrentSong(mCurrentArtistSongs.get(0));
@@ -166,10 +177,21 @@ public class SongRepository {
                     return;
                 }
             }
+        } else if ( mPriority == PriorityOfSongsList.FOLDER) {
+            for (int i = 0; i < mCurrentFolderSongs.size(); i++) {
+                if (mCurrentFolderSongs.get(i).getUUID().equals(mCurrentSong.getUUID())) {
+                    if (i != mCurrentFolderSongs.size() - 1)
+                        setCurrentSong(mCurrentFolderSongs.get(i + 1));
+                    else
+                        setCurrentSong(mCurrentFolderSongs.get(0));
+                    playMusic();
+                    return;
+                }
+            }
         } else {
             for (int i = 0; i < mSongList.size(); i++) {
                 if (mSongList.get(i).getUUID().equals(mCurrentSong.getUUID())) {
-                    if (i != mSongList.size()-1)
+                    if (i != mSongList.size() - 1)
                         setCurrentSong(mSongList.get(i + 1));
                     else
                         setCurrentSong(mSongList.get(0));
@@ -181,7 +203,7 @@ public class SongRepository {
     }
 
     public void playPreviousMusic() throws IOException {
-        if (mMusicRole == PlayMusicRole.ALBUM) {
+        if (mMusicRole == PlayMusicRole.ALBUM && mPriority == PriorityOfSongsList.ALBUM) {
             for (int i = 0; i < mCurrentAlbumSongs.size(); i++) {
                 if (mCurrentAlbumSongs.get(i).getUUID().equals(mCurrentSong.getUUID())) {
                     if (i != 0)
@@ -193,13 +215,24 @@ public class SongRepository {
                     return;
                 }
             }
-        } else if (mMusicRole == PlayMusicRole.ARTIST) {
+        } else if (mMusicRole == PlayMusicRole.ARTIST && mPriority == PriorityOfSongsList.ARTIST) {
             for (int i = 0; i < mCurrentArtistSongs.size(); i++) {
                 if (mCurrentArtistSongs.get(i).getUUID().equals(mCurrentSong.getUUID())) {
                     if (i != 0)
                         setCurrentSong(mCurrentArtistSongs.get(i - 1));
                     else
                         setCurrentSong(mCurrentArtistSongs.get(mCurrentArtistSongs.size() - 1));
+                    playMusic();
+                    return;
+                }
+            }
+        } else if (mMusicRole == PlayMusicRole.FOLDER && mPriority == PriorityOfSongsList.FOLDER) {
+            for (int i = 0; i < mCurrentFolderSongs.size(); i++) {
+                if (mCurrentFolderSongs.get(i).getUUID().equals(mCurrentSong.getUUID())) {
+                    if (i != 0)
+                        setCurrentSong(mCurrentFolderSongs.get(i - 1));
+                    else
+                        setCurrentSong(mCurrentFolderSongs.get(mCurrentFolderSongs.size() - 1));
                     playMusic();
                     return;
                 }
@@ -249,6 +282,14 @@ public class SongRepository {
         mCurrentSecondOfMusic = mMediaPlayer.getCurrentPosition();
     }
 
+    public PriorityOfSongsList getPriority() {
+        return mPriority;
+    }
+
+    public void setPriority(PriorityOfSongsList mPriority) {
+        this.mPriority = mPriority;
+    }
+
     public void resumeMusic() {
         mMediaPlayer.seekTo(mCurrentSecondOfMusic);
         mMediaPlayer.start();
@@ -277,6 +318,11 @@ public class SongRepository {
     public void setCurrentArtistSongs(List<Song> mCurrentArtistSongs) {
         this.mCurrentArtistSongs = mCurrentArtistSongs;
     }
+
+    public void setCurrentFolderSongs(List<Song> mCurrentFolderSongs) {
+        this.mCurrentFolderSongs = mCurrentFolderSongs;
+    }
+
 
     public List<Song> getCurrentAlbumSongs() {
         return mCurrentAlbumSongs;

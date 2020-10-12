@@ -7,7 +7,6 @@ import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -25,12 +24,14 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.example.musicplayer.R;
 import com.example.musicplayer.adapter.albums.AlbumAdapter;
 import com.example.musicplayer.adapter.artists.ArtistAdapter;
+import com.example.musicplayer.adapter.folder.FolderAdapter;
 import com.example.musicplayer.controller.fragment.AlbumListFragment;
 import com.example.musicplayer.controller.fragment.ArtistListFragment;
-import com.example.musicplayer.controller.fragment.SingleTrackPlayFragment;
+import com.example.musicplayer.controller.fragment.FolderListFragment;
 import com.example.musicplayer.controller.fragment.SongsFragment;
 import com.example.musicplayer.model.Album;
 import com.example.musicplayer.model.Artist;
+import com.example.musicplayer.model.Folder;
 import com.example.musicplayer.model.Song;
 import com.example.musicplayer.repository.SongRepository;
 import com.example.musicplayer.util.MusicState;
@@ -43,21 +44,20 @@ import com.makeramen.roundedimageview.RoundedImageView;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 
 import static java.util.Collections.singleton;
 
 public class MainActivity extends AppCompatActivity implements
         SongsFragment.InitNavigationPlayMusicCallback,
-        ArtistAdapter.StartMusicListActivity, AlbumAdapter.StartMusicListActivityInAlbum {
+        ArtistAdapter.StartMusicListActivity, AlbumAdapter.StartMusicListActivityInAlbum, FolderAdapter.StartMusicListActivityInFolder {
 
     public static final int REQUEST_CODE_START_SINGLE_TRACK_ACTIVITY = 1;
     public static final int REQUEST_CODE_START_MUSIC_LIST_ACTIVITY_FOR_ARTIST = 2;
     public static final int REQUEST_CODE_START_MUSIC_LIST_ACTIVITY_ALBUM = 3;
-    public static final String BUNDLE_MEDIAP_LAYER_POSITION = "bundle_mediaplayer_position";
-    public static final String BUNDLE_MEDIA_PLAYER_POSITION1 = BUNDLE_MEDIAP_LAYER_POSITION;
-    public static final String BUNDLE_KEY_POSITION_OF_CURRNT_SONG = "position_of_currnt_song";
+    public static final String BUNDLE_MEDIA_PLAYER_POSITION = "bundle_mediaplayer_position";
+    public static final String BUNDLE_MEDIA_PLAYER_POSITION1 = BUNDLE_MEDIA_PLAYER_POSITION;
+    public static final String BUNDLE_KEY_POSITION_OF_CURRENT_SONG = "position_of_currnt_song";
     public static final String BUNDLE_KEY_CURRENT_SECOND_SONG = "current_second_song";
     private ViewPager2 mViewPager2;
     private TabLayout mTabLayout;
@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements
 
         if (savedInstanceState != null) {
             int position = savedInstanceState.getInt(BUNDLE_KEY_CURRENT_SECOND_SONG);
-            int positionSong = savedInstanceState.getInt(BUNDLE_KEY_POSITION_OF_CURRNT_SONG);
+            int positionSong = savedInstanceState.getInt(BUNDLE_KEY_POSITION_OF_CURRENT_SONG);
             Song song = mSongRepository.getSongList().get(positionSong);
             mSongRepository.setCurrentSong(song);
             try {
@@ -125,8 +125,6 @@ public class MainActivity extends AppCompatActivity implements
             updateNavBar();
         }
     }
-
-
 
 
     @Override
@@ -147,8 +145,8 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt(BUNDLE_KEY_POSITION_OF_CURRNT_SONG , mSongRepository.getPosition(mSongRepository.getCurrentSong()));
-        outState.putInt(BUNDLE_KEY_CURRENT_SECOND_SONG , mSongRepository.getMediaPlayer().getCurrentPosition());
+        outState.putInt(BUNDLE_KEY_POSITION_OF_CURRENT_SONG, mSongRepository.getPosition(mSongRepository.getCurrentSong()));
+        outState.putInt(BUNDLE_KEY_CURRENT_SECOND_SONG, mSongRepository.getMediaPlayer().getCurrentPosition());
     }
 
     private void findViews() {
@@ -259,6 +257,10 @@ public class MainActivity extends AppCompatActivity implements
                     tab.setText("Albums");
                 else if (position == 2)
                     tab.setText("Artists");
+                else if (position == 3)
+                    tab.setText("Folders");
+                else if (position == 4)
+                    tab.setText("Favorite");
             }
         }).attach();
     }
@@ -267,6 +269,7 @@ public class MainActivity extends AppCompatActivity implements
         FragmentStateAdapter TaskAdapter = new ViewPagerAdapter(this);
         mViewPager2.setAdapter(TaskAdapter);
     }
+
 
 
     private class ViewPagerAdapter extends FragmentStateAdapter {
@@ -279,15 +282,20 @@ public class MainActivity extends AppCompatActivity implements
         @Override
         public Fragment createFragment(int position) {
             if (position == 0) {
-                return SongsFragment.newInstance(null, null);
+                return SongsFragment.newInstance(null, null,null);
             } else if (position == 1) {
                 return AlbumListFragment.newInstance();
-            } else return ArtistListFragment.newInstance();
+            } else if (position == 2)
+                return ArtistListFragment.newInstance();
+            else if (position == 3)
+                return FolderListFragment.newInstance();
+            else
+                return ArtistListFragment.newInstance();
         }
 
         @Override
         public int getItemCount() {
-            return 3;
+            return 5;
         }
     }
 
@@ -304,20 +312,25 @@ public class MainActivity extends AppCompatActivity implements
         if (mPic != null) {
             Bitmap songImage = BitmapFactory.decodeByteArray(mPic, 0, mPic.length);
             mImageViewSongCover.setImageBitmap(songImage);
-        } else mImageViewSongCover.setBackgroundResource(R.drawable.default_image_round);
+        } else mImageViewSongCover.setImageResource(R.mipmap.ic_empty_cover_foreground);
 
     }
 
     @Override
     public void startForArtistCallBack(Artist artist) {
-        Intent intent = MusicListActivity.newIntent(this, null, artist);
+        Intent intent = MusicListActivity.newIntent(this, null, artist , null);
         startActivityForResult(intent, REQUEST_CODE_START_MUSIC_LIST_ACTIVITY_FOR_ARTIST);
     }
 
     @Override
     public void startForAlbumCallBack(Album album) {
-        Intent intent = MusicListActivity.newIntent(this, album, null);
+        Intent intent = MusicListActivity.newIntent(this, album, null,null);
         startActivityForResult(intent, REQUEST_CODE_START_MUSIC_LIST_ACTIVITY_ALBUM);
     }
 
+    @Override
+    public void startForFolderCallBack(Folder folder) {
+        Intent intent = MusicListActivity.newIntent(this, null, null,folder);
+        startActivityForResult(intent, REQUEST_CODE_START_MUSIC_LIST_ACTIVITY_ALBUM);
+    }
 }

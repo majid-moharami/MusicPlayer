@@ -49,10 +49,11 @@
             android:background="#171717"
             android:scrollbarSize="8dp"
             app:tabIndicator="@drawable/tab_indcator"
-            app:tabIndicatorColor="#B7B8B5"
+            app:tabIndicatorColor="#FB0E3C"
             app:tabIndicatorHeight="3dp"
             app:tabMaxWidth="0dp"
-            app:tabTextColor="#FFFFFF" />
+            app:tabTextColor="#FFFFFF"
+            app:tabMode="scrollable"/>
 
     </com.google.android.material.appbar.AppBarLayout>
 

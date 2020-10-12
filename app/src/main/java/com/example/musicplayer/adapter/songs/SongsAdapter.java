@@ -20,6 +20,7 @@ import com.example.musicplayer.R;
 import com.example.musicplayer.model.Song;
 import com.example.musicplayer.repository.SongRepository;
 import com.example.musicplayer.util.PlayMusicRole;
+import com.example.musicplayer.util.PriorityOfSongsList;
 import com.example.musicplayer.util.SongBitmapLoader;
 import com.makeramen.roundedimageview.RoundedImageView;
 
@@ -109,6 +110,13 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.SongHolder> 
                         mPlayMusicCallback.onClick(mSong.getUUID());
                         if (mSongRepository.isMain()) {
                             mSongRepository.setMusicRole(PlayMusicRole.ALL);
+                            mSongRepository.setPriority(PriorityOfSongsList.ALL);
+                        }else if (mSongRepository.getMusicRole() == PlayMusicRole.ALBUM){
+                            mSongRepository.setPriority(PriorityOfSongsList.ALBUM);
+                        }else if (mSongRepository.getMusicRole() == PlayMusicRole.ARTIST){
+                            mSongRepository.setPriority(PriorityOfSongsList.ARTIST);
+                        }else if (mSongRepository.getMusicRole() == PlayMusicRole.FOLDER){
+                            mSongRepository.setPriority(PriorityOfSongsList.FOLDER);
                         }
                     } catch (IOException e) {
                         e.printStackTrace();

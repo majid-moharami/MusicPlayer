@@ -21,6 +21,8 @@ import com.example.musicplayer.model.Album;
 import com.example.musicplayer.model.Artist;
 import com.example.musicplayer.model.Song;
 import com.example.musicplayer.repository.SongRepository;
+import com.example.musicplayer.util.PlayMusicRole;
+import com.example.musicplayer.util.PriorityOfSongsList;
 import com.example.musicplayer.util.SongBitmapLoader;
 import com.makeramen.roundedimageview.RoundedImageView;
 
@@ -94,10 +96,9 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistHold
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-//                    Intent intent = MusicListActivity.newIntent(mContext,null,mArtist);
-//                    mContext.startActivity(intent);
                     mStartMusicListActivity.startForArtistCallBack(mArtist);
                     mSongRepository.setIsMain(false);
+                    mSongRepository.setMusicRole(PlayMusicRole.ARTIST);
                 }
             });
         }

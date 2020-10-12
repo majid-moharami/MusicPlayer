@@ -16,6 +16,8 @@ import com.example.musicplayer.R;
 import com.example.musicplayer.model.Album;
 import com.example.musicplayer.model.Song;
 import com.example.musicplayer.repository.SongRepository;
+import com.example.musicplayer.util.PlayMusicRole;
+import com.example.musicplayer.util.PriorityOfSongsList;
 import com.example.musicplayer.util.SongBitmapLoader;
 
 import java.util.ArrayList;
@@ -93,12 +95,10 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumHolder>
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
-//                    Intent intent = MusicListActivity.newIntent(mContext,mAlbum,null);
-//                    mContext.startActivity(intent);
                     mStartMusicListActivityInAlbum.startForAlbumCallBack(mAlbum);
                     mSongRepository.setIsMain(false);
-
+                   // mSongRepository.setPriority(PriorityOfSongsList.ALBUM);
+                    mSongRepository.setMusicRole(PlayMusicRole.ALBUM);
                 }
             });
         }
@@ -110,7 +110,6 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumHolder>
 
             mArtistName.setText(song.getArtistName() + " | " + mAlbum.getSongsOfAlbum().size());
             mCoverAlbum.setImageResource(R.mipmap.ic_empty_cover_foreground);
-
             mSongBitmapLoader.messageCreator(this, song.getPath());
 //            MediaMetadataRetriever mMediaMetadataRetriever = new MediaMetadataRetriever();
 //            mMediaMetadataRetriever.setDataSource(song.getPath());
