@@ -2,6 +2,7 @@ package com.example.musicplayer.controller.fragment;
 
 import android.content.Context;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,6 +43,7 @@ public class SongsFragment extends Fragment implements SongsAdapter.PlayMusicCal
     private List<Song> mAllMusic = new ArrayList<>();
     private MediaPlayer mMediaPlayer = new MediaPlayer();
     private InitNavigationPlayMusicCallback mCallback;
+    private InitFloatingImageCover mCover;
 
 
     public static SongsFragment newInstance(Album album, Artist artist, Folder folder) {
@@ -67,7 +69,6 @@ public class SongsFragment extends Fragment implements SongsAdapter.PlayMusicCal
         View view = inflater.inflate(R.layout.fragment_songs, container, false);
         findViews(view);
         initUi();
-
         mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 1));
         updateUI();
         return view;
@@ -102,7 +103,6 @@ public class SongsFragment extends Fragment implements SongsAdapter.PlayMusicCal
                         }
                     }
                     mSongRepository.setCurrentArtistSongs(mAllMusic);
-
                 }
                 //mAllMusic = artist.getSongsOfArtist();
             } else if (folder != null) {
@@ -125,6 +125,9 @@ public class SongsFragment extends Fragment implements SongsAdapter.PlayMusicCal
         super.onAttach(context);
         if (context instanceof InitNavigationPlayMusicCallback) {
             mCallback = (InitNavigationPlayMusicCallback) context;
+        }
+        if (context instanceof InitFloatingImageCover){
+            mCover = (InitFloatingImageCover) context;
         }
     }
 
@@ -160,6 +163,10 @@ public class SongsFragment extends Fragment implements SongsAdapter.PlayMusicCal
 
     public interface InitNavigationPlayMusicCallback {
         void onClick(UUID uuid);
+    }
+
+    public interface InitFloatingImageCover {
+        void onTime(String path);
     }
 
     @Override

@@ -1,7 +1,10 @@
 package com.example.musicplayer.controller.fragment;
 
 import android.annotation.SuppressLint;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
@@ -16,6 +19,8 @@ import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import android.os.Handler;
+import android.os.IBinder;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,8 +30,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.musicplayer.R;
+import com.example.musicplayer.controller.activity.MusicSingleTrackActivity;
 import com.example.musicplayer.model.Song;
 import com.example.musicplayer.repository.SongRepository;
+import com.example.musicplayer.service.MusicService;
 import com.example.musicplayer.util.GifImageView;
 import com.example.musicplayer.util.MusicState;
 import com.jgabrielfreitas.core.BlurImageView;

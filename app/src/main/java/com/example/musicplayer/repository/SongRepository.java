@@ -3,6 +3,7 @@ package com.example.musicplayer.repository;
 import android.content.Context;
 import android.media.MediaPlayer;
 
+import com.example.musicplayer.manager.SharedPreferencesMusic;
 import com.example.musicplayer.model.Album;
 import com.example.musicplayer.model.Artist;
 import com.example.musicplayer.model.Folder;
@@ -33,14 +34,16 @@ public class SongRepository {
     private MusicState mRepeatState = MusicState.IS_NOT_REPEAT;
     private PlayMusicRole mMusicRole = PlayMusicRole.ALL;
     private PriorityOfSongsList mPriority = PriorityOfSongsList.ALL;
-
     private int mCurrentSecondOfMusic;
 
+    private static SharedPreferencesMusic mSharedPreferencesMusic;
 
     public static SongRepository getSongRepository(Context context) {
         mContext = context.getApplicationContext();
-        if (sSongRepository == null)
+        if (sSongRepository == null) {
             sSongRepository = new SongRepository();
+            mSharedPreferencesMusic = new SharedPreferencesMusic(context);
+        }
 
         return sSongRepository;
     }
@@ -71,7 +74,7 @@ public class SongRepository {
         return null;
     }
 
-    public void playMusic() throws IOException {
+    public Song playMusic() throws IOException {
         if (mShuffleState == MusicState.IS_SHUFFLE) {
             if (mMusicRole == PlayMusicRole.ALBUM && mPriority == PriorityOfSongsList.ALBUM) {
                 Random random = new Random();
@@ -87,16 +90,18 @@ public class SongRepository {
                 mCurrentSong = mSongList.get(random.nextInt(mSongList.size()));
             }
         }
-        if (mMediaPlayer != null) {
-            if (mMediaPlayer.isPlaying())
-                mMediaPlayer.stop();
-            mMediaPlayer.release();
-            mMediaPlayer = null;
-        }
-        mMediaPlayer = new MediaPlayer();
-        mMediaPlayer.setDataSource(mContext, mCurrentSong.getUri());
-        mMediaPlayer.prepare();
-        mMediaPlayer.start();
+        return mCurrentSong;
+//        if (mMediaPlayer != null) {
+//            if (mMediaPlayer.isPlaying())
+//                mMediaPlayer.stop();
+//            mMediaPlayer.release();
+//            mMediaPlayer = null;
+//        }
+//        mMediaPlayer = new MediaPlayer();
+//        mMediaPlayer.setDataSource(mContext, mCurrentSong.getUri());
+//        mMediaPlayer.prepare();
+//        mMediaPlayer.start();
+
     }
 
     public int getPosition(Song song) {
@@ -124,6 +129,9 @@ public class SongRepository {
         return mMediaPlayer;
     }
 
+    public void setMediaPlayer(MediaPlayer mediaPlayer){
+        mMediaPlayer = mediaPlayer;
+    }
     public List<Album> getAllAlbum() {
         List<Album> albumList = new ArrayList<>();
 
@@ -154,7 +162,7 @@ public class SongRepository {
         return FolderSeparator.getFolders(mSongList);
     }
 
-    public void playNextMusic() throws IOException {
+    public Song playNextMusic() throws IOException {
         if ( mPriority == PriorityOfSongsList.ALBUM) {
             for (int i = 0; i < mCurrentAlbumSongs.size(); i++) {
                 if (mCurrentAlbumSongs.get(i).getUUID().equals(mCurrentSong.getUUID())) {
@@ -162,8 +170,8 @@ public class SongRepository {
                         setCurrentSong(mCurrentAlbumSongs.get(i + 1));
                     else
                         setCurrentSong(mCurrentAlbumSongs.get(0));
-                    playMusic();
-                    return;
+                   // playMusic();
+                    return mCurrentSong;
                 }
             }
         } else if (mPriority == PriorityOfSongsList.ARTIST) {
@@ -173,8 +181,8 @@ public class SongRepository {
                         setCurrentSong(mCurrentArtistSongs.get(i + 1));
                     else
                         setCurrentSong(mCurrentArtistSongs.get(0));
-                    playMusic();
-                    return;
+                    //playMusic();
+                    return mCurrentSong;
                 }
             }
         } else if ( mPriority == PriorityOfSongsList.FOLDER) {
@@ -184,8 +192,8 @@ public class SongRepository {
                         setCurrentSong(mCurrentFolderSongs.get(i + 1));
                     else
                         setCurrentSong(mCurrentFolderSongs.get(0));
-                    playMusic();
-                    return;
+                    //playMusic();
+                    return mCurrentSong;
                 }
             }
         } else {
@@ -195,14 +203,15 @@ public class SongRepository {
                         setCurrentSong(mSongList.get(i + 1));
                     else
                         setCurrentSong(mSongList.get(0));
-                    playMusic();
-                    return;
+                   // playMusic();
+                    return mCurrentSong;
                 }
             }
         }
+        return mCurrentSong;
     }
 
-    public void playPreviousMusic() throws IOException {
+    public Song playPreviousMusic() throws IOException {
         if (mMusicRole == PlayMusicRole.ALBUM && mPriority == PriorityOfSongsList.ALBUM) {
             for (int i = 0; i < mCurrentAlbumSongs.size(); i++) {
                 if (mCurrentAlbumSongs.get(i).getUUID().equals(mCurrentSong.getUUID())) {
@@ -211,8 +220,8 @@ public class SongRepository {
                     else
                         setCurrentSong(mCurrentAlbumSongs.get(mCurrentAlbumSongs.size() - 1));
 
-                    playMusic();
-                    return;
+                   // playMusic();
+                    return mCurrentSong;
                 }
             }
         } else if (mMusicRole == PlayMusicRole.ARTIST && mPriority == PriorityOfSongsList.ARTIST) {
@@ -222,8 +231,8 @@ public class SongRepository {
                         setCurrentSong(mCurrentArtistSongs.get(i - 1));
                     else
                         setCurrentSong(mCurrentArtistSongs.get(mCurrentArtistSongs.size() - 1));
-                    playMusic();
-                    return;
+                    //playMusic();
+                    return mCurrentSong;
                 }
             }
         } else if (mMusicRole == PlayMusicRole.FOLDER && mPriority == PriorityOfSongsList.FOLDER) {
@@ -233,8 +242,8 @@ public class SongRepository {
                         setCurrentSong(mCurrentFolderSongs.get(i - 1));
                     else
                         setCurrentSong(mCurrentFolderSongs.get(mCurrentFolderSongs.size() - 1));
-                    playMusic();
-                    return;
+                    //playMusic();
+                    return mCurrentSong;
                 }
             }
         } else {
@@ -244,11 +253,12 @@ public class SongRepository {
                         setCurrentSong(mSongList.get(i - 1));
                     else
                         setCurrentSong(mSongList.get(mSongList.size() - 1));
-                    playMusic();
-                    return;
+                    //playMusic();
+                    return mCurrentSong;
                 }
             }
         }
+        return mCurrentSong;
     }
 
     public List<Artist> getAllArtist() {
@@ -282,45 +292,46 @@ public class SongRepository {
         mCurrentSecondOfMusic = mMediaPlayer.getCurrentPosition();
     }
 
-    public PriorityOfSongsList getPriority() {
-        return mPriority;
-    }
-
-    public void setPriority(PriorityOfSongsList mPriority) {
-        this.mPriority = mPriority;
-    }
-
     public void resumeMusic() {
         mMediaPlayer.seekTo(mCurrentSecondOfMusic);
         mMediaPlayer.start();
     }
 
+    public PriorityOfSongsList getPriority() {
+        return mPriority;
+    }
+
+    public void setPriority(PriorityOfSongsList Priority) {
+        this.mPriority = Priority;
+    }
+
+
     public boolean isMain() {
         return mIsMain;
     }
 
-    public void setIsMain(boolean mIsMain) {
-        this.mIsMain = mIsMain;
+    public void setIsMain(boolean IsMain) {
+        this.mIsMain = IsMain;
     }
 
     public PlayMusicRole getMusicRole() {
         return mMusicRole;
     }
 
-    public void setMusicRole(PlayMusicRole mMusicRole) {
-        this.mMusicRole = mMusicRole;
+    public void setMusicRole(PlayMusicRole MusicRole) {
+        this.mMusicRole = MusicRole;
     }
 
     public List<Song> getCurrentArtistSongs() {
         return mCurrentArtistSongs;
     }
 
-    public void setCurrentArtistSongs(List<Song> mCurrentArtistSongs) {
-        this.mCurrentArtistSongs = mCurrentArtistSongs;
+    public void setCurrentArtistSongs(List<Song> CurrentArtistSongs) {
+        this.mCurrentArtistSongs = CurrentArtistSongs;
     }
 
-    public void setCurrentFolderSongs(List<Song> mCurrentFolderSongs) {
-        this.mCurrentFolderSongs = mCurrentFolderSongs;
+    public void setCurrentFolderSongs(List<Song> CurrentFolderSongs) {
+        this.mCurrentFolderSongs = CurrentFolderSongs;
     }
 
 

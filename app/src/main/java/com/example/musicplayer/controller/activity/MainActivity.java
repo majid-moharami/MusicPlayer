@@ -1,12 +1,15 @@
 package com.example.musicplayer.controller.activity;
 
 import android.Manifest;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -34,6 +37,7 @@ import com.example.musicplayer.model.Artist;
 import com.example.musicplayer.model.Folder;
 import com.example.musicplayer.model.Song;
 import com.example.musicplayer.repository.SongRepository;
+import com.example.musicplayer.service.MusicService;
 import com.example.musicplayer.util.MusicState;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -77,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements
     private MediaMetadataRetriever mMediaMetadataRetriever = new MediaMetadataRetriever();
 
 
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,6 +101,7 @@ public class MainActivity extends AppCompatActivity implements
                 setSupportActionBar(mToolbar);
                 createViewPager();
                 configTabWithViewPager();
+
             }
 
             @Override
@@ -148,6 +154,9 @@ public class MainActivity extends AppCompatActivity implements
         outState.putInt(BUNDLE_KEY_POSITION_OF_CURRENT_SONG, mSongRepository.getPosition(mSongRepository.getCurrentSong()));
         outState.putInt(BUNDLE_KEY_CURRENT_SECOND_SONG, mSongRepository.getMediaPlayer().getCurrentPosition());
     }
+
+
+
 
     private void findViews() {
         mViewPager2 = findViewById(R.id.view_pager);
