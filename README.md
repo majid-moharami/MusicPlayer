@@ -12,9 +12,9 @@ A personal Music app project.
   - Lifecycle
    
  2. UI:
-    - Fragment
-    - Animation
-    - TabLayout
+   - Fragment
+   - Animation
+   - TabLayout
     
  # soon
  > I will convert this project in my free time.
