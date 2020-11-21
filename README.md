@@ -16,17 +16,17 @@ A personal Music app project.
  # soon
  > I will convert this project in my free time.
  1. Architecture: 
-   - MVVM
-   - LiveData
-   - DataBinding
-   - ViewModel
-   - msg loop: to bind picture of list faster
-   - Lifecycle
+     - MVVM
+     - LiveData
+     - DataBinding
+     - ViewModel
+     - msg loop: to bind picture of list faster
+     - Lifecycle
    
  2. UI:
-    - Fragment
-    - Animation
-    - TabLayout
+     - Fragment
+     - Animation
+     - TabLayout
     
     
     
