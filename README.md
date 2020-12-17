@@ -5,7 +5,7 @@ A personal Music app project.
 # Libraries Used
 1. Architecture: 
    - MVC
-   - Fourground service to play music when the app is close
+   - Foreground service to play music when the app is close
    - msg loop: to bind picture of list faster
    - Lifecycle
    
